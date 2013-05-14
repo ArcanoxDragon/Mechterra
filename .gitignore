@@ -1,5 +1,7 @@
 *
 !.gitignore
 !README.md
-!src/*
-!bin/*
+!src/
+!bin/
+*.dll
+*.aps

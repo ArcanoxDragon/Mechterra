@@ -6,6 +6,8 @@
  */
 
 #include "../game/options.h"
+#include "../gui/Control.h"
+#include "../gui/ControlButton.h"
 #include "../util/util.h"
 #include "State.h"
 #include "StateMainMenu.h"
@@ -15,11 +17,9 @@
 #include <iostream>
 using std::cout;
 
-GLuint tex = 0;
-
 StateMainMenu::StateMainMenu()
 {
-	
+	controls = vector<Control*>();
 }
 
 StateMainMenu::~StateMainMenu()
@@ -29,36 +29,24 @@ StateMainMenu::~StateMainMenu()
 
 void StateMainMenu::tick()
 {
-	
+	for (UINT c = 0; c < controls.size(); c++)
+	{
+		controls[c]->tick();
+	}
 }
 
 void StateMainMenu::render()
 {
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glPushMatrix();
-	glLoadIdentity();
-	glTranslatef(50.0f, 50.0f, 0.0f);
-	glRotatef(((float) millis()) / 50.0f, 0, 0, 1);
-	glTranslatef(-50.0f, -50.0f, 0.0f);
-	glBegin(GL_QUADS);
+	for (UINT c = 0; c < controls.size(); c++)
 	{
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex2f(0.0f, 0.0f);
-		
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex2f(100.0f, 0.0f);
-		
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex2f(100.0f, 100.0f);
-		
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex2f(0.0f, 100.0f);
+		controls[c]->render();
 	}
-	glEnd();
-	glPopMatrix();
-	glDisable(GL_TEXTURE_2D);
+}
+
+void StateMainMenu::addControl(Control *control)
+{
+	controls.push_back(control);
 }
 
 void StateMainMenu::init()
@@ -76,7 +64,6 @@ void StateMainMenu::init()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	
-	tex = loadTexture("res/tex/test.png");
-	cout << tex;
+	addControl(new ControlButton(1, 8, 8, 128, 32));
 }
 

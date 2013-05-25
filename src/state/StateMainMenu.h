@@ -9,6 +9,10 @@
 #define STATEMAINMENU_H_
 
 #include "State.h"
+#include "../gui/Control.h"
+#include "SDL_opengl.h"
+#include <vector>
+using std::vector;
 
 class StateMainMenu: public State
 {
@@ -18,6 +22,9 @@ public:
 	void tick();
 	void render();
 	void init();
+	void addControl(Control*);
+private:
+	vector<Control*> controls;
 };
 
 #endif /* STATEMAINMENU_H_ */

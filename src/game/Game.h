@@ -29,11 +29,13 @@ public:
 private:
 	Game();
 	bool init();
+	static int tickThread(void*);
 	
 	SDL_Surface *screen;
 	SDL_Event ev;
 	State *curState;
 	bool initialized;
+	bool running;
 	double fps;
 	double aFPS;
 	int aCount;

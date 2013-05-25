@@ -16,6 +16,7 @@
 #include "../util/util.h"
 #include "SDL.h"
 #include "SDL_video.h"
+#include "SDL_thread.h"
 using std::max;
 using std::min;
 
@@ -29,6 +30,7 @@ Game::Game()
 	fps = 0.0f;
 	aFPS = 0.0f;
 	aCount = 0;
+	running = false;
 }
 
 Game::~Game()
@@ -44,6 +46,20 @@ State* Game::getCurrentState()
 	return curState;
 }
 
+int Game::tickThread(void* game)
+{
+	Game *iGame = (Game*) game;
+	while (iGame->running)
+	{
+		if (iGame->curState != NULL)
+		{
+			iGame->curState->tick();
+		}
+		SDL_Delay(1000.0f / 60.0f);
+	}
+	return 0;
+}
+
 int Game::startGame()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -57,9 +73,15 @@ int Game::startGame()
 	}
 
 	activateState<StateMainMenu>();
-	bool running = true;
+	running = true;
 	int time;
 	int diff = 0;
+	SDL_Thread *threadTick = SDL_CreateThread(tickThread, this);
+	if (threadTick == NULL)
+	{
+		SDL_Quit();
+		return 1;
+	}
 	
 	while (running)
 	{
@@ -89,6 +111,7 @@ int Game::startGame()
 		SDL_WM_SetCaption(string("MechTerra - FPS: " + dtostr(fps)).c_str(), NULL);
 	}
 
+	SDL_WaitThread(threadTick, NULL);
 	SDL_Quit();
 	return 0;
 }

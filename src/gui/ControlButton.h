@@ -13,15 +13,19 @@
 class ControlButton: public Control
 {
 public:
-	ControlButton(int);
-	ControlButton(int, int, int, int, int);
+	ControlButton(int, void (*)());
+	ControlButton(int, int, int, int, int, void (*)());
 	ControlButton();
 	virtual ~ControlButton();
 	virtual void render();
 	virtual void tick();
 	void getID();
 private:
+	bool isMouseInside();
+
+	void (*onClick)();
 	int id;
+	bool down;
 };
 
 #endif /* CONTROLBUTTON_H_ */

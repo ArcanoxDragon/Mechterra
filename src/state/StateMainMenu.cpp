@@ -5,6 +5,7 @@
  *      Author: Brian
  */
 
+#include "../game/Game.h"
 #include "../game/options.h"
 #include "../gui/Control.h"
 #include "../gui/ControlButton.h"
@@ -64,6 +65,6 @@ void StateMainMenu::init()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	
-	addControl(new ControlButton(1, 8, 8, 128, 32));
+	addControl(new ControlButton(1, 8, 8, 128, 32, &SDL_Quit));
 }
 

@@ -14,6 +14,10 @@
 
 #define ICON "res/tex/test.png"
 
+#include <vector>
+#include "SDL_events.h"
+using std::vector;
+
 class Game
 {
 public:
@@ -24,6 +28,7 @@ public:
 	bool isInitialized();
 	template<class T> void activateState();
 	int getFPS();
+	vector<SDL_Event>* getEventsThisFrame();
 
 	static Game* getInstance();
 private:
@@ -32,12 +37,14 @@ private:
 	static int tickThread(void*);
 	
 	SDL_Surface *screen;
-	SDL_Event ev;
 	State *curState;
+	vector<SDL_Event> *events;
 	bool initialized;
 	bool running;
+	bool eventLock;
 	double fps;
 	double aFPS;
+	long lastFPS;
 	int aCount;
 	
 	static Game* instance;

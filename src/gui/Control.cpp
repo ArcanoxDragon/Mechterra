@@ -71,11 +71,3 @@ int Control::getHeight()
 	return height;
 }
 
-void Control::tick()
-{
-}
-
-void Control::render()
-{
-}
-

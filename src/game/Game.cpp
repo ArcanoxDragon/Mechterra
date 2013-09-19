@@ -26,15 +26,19 @@ Game::Game()
 {
 	screen = NULL;
 	curState = NULL;
+	events = new vector<SDL_Event>();
 	initialized = false;
+	eventLock = false;
 	fps = 0.0f;
 	aFPS = 0.0f;
+	lastFPS = 0;
 	aCount = 0;
 	running = false;
 }
 
 Game::~Game()
 {
+	delete screen;
 	delete curState;
 	screen = NULL;
 	curState = NULL;
@@ -53,6 +57,10 @@ int Game::tickThread(void* game)
 	{
 		if (iGame->curState != NULL)
 		{
+			// Wait for cross-thread lock on vector
+			while (iGame->eventLock)
+			{
+			}
 			iGame->curState->tick();
 		}
 		SDL_Delay(1000.0f / 60.0f);
@@ -63,15 +71,15 @@ int Game::tickThread(void* game)
 int Game::startGame()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
-
+	
 	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, SDL_OPENGL);
-
+	
 	if (!init())
 	{
 		SDL_Quit();
 		return 1;
 	}
-
+	
 	activateState<StateMainMenu>();
 	running = true;
 	int time;
@@ -88,8 +96,12 @@ int Game::startGame()
 		time = millis();
 		Renderer::render();
 		SDL_Flip(screen);
+		eventLock = true;
+		SDL_Event ev;
+		events->clear();
 		while (SDL_PollEvent(&ev))
 		{
+			events->push_back(ev);
 			switch (ev.type)
 			{
 				case SDL_QUIT:
@@ -98,19 +110,21 @@ int Game::startGame()
 				}
 			}
 		}
+		eventLock = false;
 		SDL_Delay(max(0.0f, (1000.0f / 60.0f) - max(diff, 0)));
 		diff = millis() - time;
 		aFPS += 1.0f / (diff / MILLIS_PER_SEC);
 		aCount++;
-		if (aCount >= 60)
+		if (time - lastFPS > 1000)
 		{
 			fps = max(min(aFPS / (double) aCount, 1000.0), 0.0);
 			aCount = 0;
 			aFPS = 0;
+			lastFPS = time;
 		}
 		SDL_WM_SetCaption(string("MechTerra - FPS: " + dtostr(fps)).c_str(), NULL);
 	}
-
+	
 	SDL_WaitThread(threadTick, NULL);
 	SDL_Quit();
 	return 0;
@@ -131,6 +145,14 @@ void Game::activateState()
 int Game::getFPS()
 {
 	return fps;
+}
+
+vector<SDL_Event>* Game::getEventsThisFrame()
+{
+	while (this->eventLock)
+	{
+	}
+	return this->events;
 }
 
 bool Game::init()
